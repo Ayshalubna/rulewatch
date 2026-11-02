@@ -11,7 +11,7 @@ RUN python -m zipfile -e /tmp/app.zip /app && rm /tmp/app.zip
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
 # Download the multilingual search model, shrink it to 8-bit (4x less memory) and check its quality
-RUN python -m rulewatch.shrink_model /app/models
+RUN pip install onnx && python -m rulewatch.shrink_model /app/models && pip uninstall -y onnx
 RUN mkdir -p data/pdfs
 
 EXPOSE 10000
