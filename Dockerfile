@@ -8,6 +8,10 @@ WORKDIR /app
 
 COPY app.zip /tmp/app.zip
 RUN python -m zipfile -e /tmp/app.zip /app && rm /tmp/app.zip
+
+# Source patches on top of the packed app: improved answer agent, essentials briefs, 3D interface layer
+COPY patch/ /tmp/patch/
+RUN python /tmp/patch/apply.py /app && rm -rf /tmp/patch
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
 # Download the multilingual search model, shrink it to 8-bit (4x less memory) and check its quality
