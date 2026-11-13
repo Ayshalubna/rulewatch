@@ -1,0 +1,46 @@
+/* RuleWatch 3D layer (see enhance.js). Everything here is additive and safe to remove. */
+#rw3d{position:fixed;inset:0;z-index:30;pointer-events:none;mix-blend-mode:screen;opacity:.9}
+html.rw3d-on body::after{content:"";position:fixed;inset:0;z-index:29;pointer-events:none;
+  background:radial-gradient(520px circle at var(--rw-mx,70%) var(--rw-my,30%),rgba(214,170,92,.075),transparent 62%);
+  mix-blend-mode:screen}
+
+/* 3D tilt + moving glare on cards */
+.panel,[role="radio"],main a[href^="#/rules/"]{transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s ease,border-color .35s ease;
+  transform-style:preserve-3d;will-change:transform;position:relative}
+.rw-tilting{transition:transform .08s linear,box-shadow .25s ease,border-color .25s ease !important;
+  box-shadow:0 24px 60px -24px rgba(0,0,0,.75),0 0 0 1px rgba(214,170,92,.28),0 0 44px -12px rgba(214,170,92,.30) !important;z-index:2}
+.rw-tilting::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:3;
+  background:radial-gradient(340px circle at var(--rw-gx,50%) var(--rw-gy,50%),rgba(255,236,190,.13),transparent 60%)}
+
+/* scroll-in reveal with depth */
+.rw-reveal{opacity:0;transform:perspective(1000px) translateY(34px) rotateX(9deg) scale(.975);transform-origin:50% 100%}
+.rw-reveal.rw-in{opacity:1;transform:none;transition:opacity .8s ease,transform .9s cubic-bezier(.16,.9,.24,1)}
+
+/* hero headline: rises in with depth, soft moving sheen */
+html.rw3d-on main h1{animation:rw-rise 1.1s cubic-bezier(.16,.9,.24,1) both;
+  background:linear-gradient(100deg,#f3ead8 0%,#f3ead8 38%,#ffe2a6 50%,#f3ead8 62%,#f3ead8 100%);background-size:260% 100%;
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+  animation:rw-rise 1.1s cubic-bezier(.16,.9,.24,1) both,rw-sheen 7s ease-in-out 1.2s infinite}
+@keyframes rw-rise{from{opacity:0;transform:perspective(900px) translateY(46px) rotateX(18deg);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+@keyframes rw-sheen{0%,55%{background-position:120% 0}100%{background-position:-60% 0}}
+html.rw3d-on main h1 + p{animation:rw-rise .9s .18s cubic-bezier(.16,.9,.24,1) both}
+
+/* buttons: lift, glow and a passing light */
+.btn-primary{position:relative;overflow:hidden;transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s ease}
+.btn-primary:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 14px 34px -10px rgba(214,170,92,.65),0 0 0 1px rgba(255,236,190,.35)}
+.btn-primary:active{transform:translateY(0) scale(.99)}
+.btn-primary::after{content:"";position:absolute;top:0;bottom:0;width:42%;left:-60%;pointer-events:none;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.42),transparent);transform:skewX(-18deg);animation:rw-pass 4.6s ease-in-out infinite}
+@keyframes rw-pass{0%,62%{left:-60%}100%{left:140%}}
+.btn-quiet{transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
+.btn-quiet:hover{transform:translateY(-2px);box-shadow:0 12px 28px -14px rgba(94,214,170,.55)}
+.chip{transition:transform .2s ease,box-shadow .2s ease}
+.chip:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 10px 24px -14px rgba(214,170,92,.6)}
+header a,header button{transition:transform .2s ease}
+header a:hover{transform:translateY(-1px)}
+
+@media (prefers-reduced-motion:reduce){
+  .rw-reveal{opacity:1;transform:none}
+  html.rw3d-on main h1,html.rw3d-on main h1 + p,.btn-primary::after{animation:none}
+  html.rw3d-on main h1{-webkit-text-fill-color:currentColor;background:none}
+}
