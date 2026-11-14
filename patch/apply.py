@@ -4,7 +4,8 @@
 
 - rulewatch/knowledge.py          essentials briefs (plain-English reference notes, loaded at start-up)
 - rulewatch/agents/ask_agent.py   the improved answer agent for the Ask tab
-- frontend/dist/enhance.js/.css   the 3D interface layer
+- rulewatch/web_lookup.py         live web lookup (official UAE sources first) for questions the library lacks
+- frontend/dist/enhance.js/.css   the 3D interface layer and the rule calculators
 The script stops the build if anything it expects to change is missing, so a bad patch can never go live.
 """
 import shutil
@@ -26,6 +27,7 @@ def edit(path: Path, old: str, new: str):
 
 shutil.copy(here / "knowledge.py", app / "rulewatch" / "knowledge.py")
 shutil.copy(here / "ask_agent.py", app / "rulewatch" / "agents" / "ask_agent.py")
+shutil.copy(here / "web_lookup.py", app / "rulewatch" / "web_lookup.py")
 shutil.copy(here / "enhance.js", app / "frontend" / "dist" / "enhance.js")
 shutil.copy(here / "enhance.css", app / "frontend" / "dist" / "enhance.css")
 
@@ -73,7 +75,7 @@ if "enhance.js" not in html:
     if "</head>" not in html:
         raise SystemExit("PATCH FAILED: index.html has no </head>")
     index.write_text(html.replace(
-        "</head>", '  <link rel="stylesheet" href="/enhance.css?v=3">\n    <script defer src="/enhance.js?v=3"></script>\n  </head>', 1),
+        "</head>", '  <link rel="stylesheet" href="/enhance.css?v=4">\n    <script defer src="/enhance.js?v=4"></script>\n  </head>', 1),
         encoding="utf-8")
 
 print("RuleWatch patches applied.")
