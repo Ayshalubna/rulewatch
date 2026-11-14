@@ -2,13 +2,23 @@
 
 **AI agents that watch Dubai real estate rules (DLD, RERA, VARA and Dubai law), and check a business's plans against the exact clause.**
 
+**▶ Live app: https://rulewatch.onrender.com** (free hosting: the first visit after a quiet spell can take about a minute to wake up)
+
+| | |
+|---|---|
+| Plan checks tested | **26 / 26** expected verdicts matched on the live app ([results](evaluation/RESULTS.md)) |
+| Rule library | 20 official documents, 1,324 searchable passages, 21 sources watched |
+| Languages | English and Arabic (right-to-left) |
+| Cost to run | $0: Groq free API, Render free plan, open embedding model |
+
 Real estate rules in Dubai change often. Agencies, developers, landlords and proptech startups find out late and can get fined. RuleWatch fixes this:
 
 - **Watches** official sources every day, by itself, and spots new and **updated** rules (PDFs and web pages).
 - **Reads** each document from start to end and explains it in simple English and Arabic.
 - **Alerts** each registered business only about the rules that affect it.
 - **Checks a plan**: describe what you want to do, get a 🔴 / 🟡 / 🟢 verdict for each action with the official clause quoted.
-- **Answers questions** using only the official documents, citing the source for every claim.
+- **Answers questions** from the official documents, citing the source for every claim. If the library doesn't cover a question, it says so, searches official UAE websites (.gov.ae, VARA, Central Bank) and labels that answer clearly instead of guessing.
+- **Calculates** the numbers people ask most: the allowed rent increase (Decree No. 43 of 2013), the full cost of buying (DLD 4% fee and fixed fees) and Rental Disputes Center fees.
 
 > RuleWatch gives early warnings, not legal advice.
 
@@ -31,6 +41,16 @@ Plan check:    Planner → Retriever → Checker → Verifier → Reporter
 | Verifier | Citation guard: removes any citation that doesn't match a real passage; an uncited red warning is downgraded, so the AI can't invent rules |
 | Reporter | Writes the overall verdict in English or Arabic |
 
+## Evaluation
+
+26 realistic plans across all 11 business types, each with the verdict a compliance reviewer would expect (for example an Instagram ad with no Trakheesi permit, an off-plan sale paid into the developer's own account, a 20% rent rise for every tenant). Run on the live app on 14 Nov 2026:
+
+- **26 / 26** overall verdicts matched (20 red, 3 yellow, 3 green)
+- **82 of 96** findings cite a specific official passage; the other 14 say "not covered by the rules loaded so far" rather than invent a rule
+- about **18 seconds** per check on the free tier
+
+Full table: [evaluation/RESULTS.md](evaluation/RESULTS.md).
+
 **Coverage:** 11 business types (agencies, developers, property managers, landlords, holiday-home operators, owners associations, tokenization startups, mortgage brokers and banks, valuation firms, facility management, tenants and buyers) across 14 topics.
 
 **Official sources:** Dubai Legislation Portal (escrow law, off-plan register law, tenancy law, rent increase decree, jointly owned property law, holiday homes rules), DLD brokerage guide and legislation, and VARA laws and rulebooks for property tokenization.
@@ -41,7 +61,15 @@ Plan check:    Planner → Retriever → Checker → Verifier → Reporter
 
 ---
 
+## How this repository is laid out
+
+- `app.zip`: the full application (Python backend, agents, built React website, scripts).
+- `patch/`: improvements applied on top of it at build time by `patch/apply.py`: the Ask agent with web lookup, plain-English essentials briefs, the 3D interface and the rule calculators. The build stops if a patch no longer fits, so a broken change never goes live.
+- `Dockerfile`: unzips the app, applies the patches and starts the server. Render rebuilds it on every push to `main`.
+
 ## Run it on Windows
+
+(Unzip `app.zip` first; the scripts below are inside it.)
 
 One time: double-click **setup.bat**. Then put your free Groq key (https://console.groq.com/keys) in the `.env` file:
 
