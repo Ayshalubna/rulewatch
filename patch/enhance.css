@@ -44,3 +44,36 @@ header a:hover{transform:translateY(-1px)}
   html.rw3d-on main h1,html.rw3d-on main h1 + p,.btn-primary::after{animation:none}
   html.rw3d-on main h1{-webkit-text-fill-color:currentColor;background:none}
 }
+
+/* rule calculators */
+#rwc-open{position:fixed;right:22px;bottom:22px;z-index:45;display:flex;align-items:center;gap:9px;padding:12px 18px;border-radius:999px;
+  border:1px solid rgba(214,170,92,.55);background:rgba(16,28,33,.86);color:#ffe2a6;font:600 14px/1 inherit;cursor:pointer;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 14px 34px -14px rgba(0,0,0,.8),0 0 28px -10px rgba(214,170,92,.5);
+  transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s ease}
+#rwc-open:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 18px 40px -14px rgba(0,0,0,.85),0 0 40px -8px rgba(214,170,92,.7)}
+#rwc-open:focus-visible,#rwc-panel button:focus-visible,#rwc-panel input:focus-visible,#rwc-panel select:focus-visible{outline:2px solid #ffe2a6;outline-offset:2px}
+#rwc-panel{position:fixed;right:22px;bottom:78px;z-index:46;width:min(400px,calc(100vw - 28px));max-height:min(640px,calc(100vh - 110px));overflow:auto;
+  border-radius:20px;border:1px solid rgba(214,170,92,.35);background:rgba(13,24,29,.94);color:#eae3d2;
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 30px 80px -20px rgba(0,0,0,.9),0 0 60px -20px rgba(214,170,92,.35);
+  animation:rwc-pop .32s cubic-bezier(.16,.9,.24,1);transform-origin:100% 100%}
+#rwc-panel[hidden]{display:none}
+@keyframes rwc-pop{from{opacity:0;transform:perspective(800px) translateY(18px) rotateX(-10deg) scale(.94)}to{opacity:1;transform:none}}
+.rwc-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 8px;font-size:16px}
+.rwc-head button{background:none;border:0;color:#b9c4c2;font-size:24px;line-height:1;cursor:pointer;padding:2px 8px;border-radius:8px}
+.rwc-tabs{display:flex;gap:6px;padding:4px 14px 10px}
+.rwc-tabs button{flex:1;padding:9px 6px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:transparent;color:#b9c4c2;font:600 12.5px/1 inherit;cursor:pointer;transition:all .2s ease}
+.rwc-tabs button.on{background:#d6aa5c;color:#17110a;border-color:#d6aa5c}
+.rwc-body{padding:4px 18px 18px}
+.rwc-form label{display:block;font-size:12.5px;color:#aab6b4;margin:10px 0 0}
+.rwc-form input:not([type=checkbox]),.rwc-form select{display:block;width:100%;margin-top:6px;padding:11px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.05);color:#f3ead8;font:500 15px/1.2 inherit}
+.rwc-form select option{color:#111}
+.rwc-form .rwc-check{display:flex;align-items:center;gap:9px;margin-top:14px;color:#cfd8d6}
+.rwc-out{margin-top:16px;border-top:1px solid rgba(255,255,255,.1);padding-top:10px}
+.rwc-row{display:flex;justify-content:space-between;gap:14px;padding:7px 0;font-size:13.5px;color:#cfd8d6}
+.rwc-row b{font-weight:600;color:#f3ead8;white-space:nowrap}
+.rwc-strong{font-size:15px}.rwc-strong span{color:#f3ead8}.rwc-strong b{color:#ffe2a6;font-size:16.5px}
+.rwc-hint{font-size:13px;color:#93a3a0;margin:6px 0}
+.rwc-note{font-size:11.5px;line-height:1.5;color:#8fa09d;margin:12px 0 0}
+[dir=rtl] #rwc-open{right:auto;left:22px}[dir=rtl] #rwc-panel{right:auto;left:22px;transform-origin:0 100%}
+@media (prefers-reduced-motion:reduce){#rwc-panel{animation:none}}
