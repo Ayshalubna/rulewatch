@@ -5,13 +5,14 @@ How a question is answered:
 2. Retriever  pulls the 10 best passages from the verified library (official documents + essentials briefs).
 3. Answerer   writes a direct, complete answer using ONLY those passages, citing each fact like [E1].
 4. Verifier   keeps only citations that point to a real passage and records how well the library covered it.
-5. If the library does not fully cover the question, a live web lookup (official sources first) or, failing
-   that, general guidance is added. It is always labelled as NOT from the verified library. No citation is
-   ever invented.
+5. If the library does not fully cover the question, the Watcher searches the live web (official UAE
+   sources first), the Reader pulls the relevant paragraphs, and the answer cites those pages. Only if the web
+   has nothing either is careful general guidance given. Both are always labelled as NOT from the verified
+   library, and no citation is ever invented.
 """
 import os
 import re
-import time
+from urllib.parse import urlparse
 
 from .. import config, llm, store
 
@@ -77,61 +78,87 @@ and "none" if they do not answer it at all. For "partial", answer the part you c
 Never invent a rule, number or citation."""
 
 
-_web_off_until = 0.0
+def _tidy(text: str) -> str:
+    """Each bullet on its own line, no markdown marks, no blank-line pile-ups."""
+    text = re.sub(r"\*\*|__|^#+\s*", "", str(text), flags=re.M)
+    text = re.sub(r"[ \t]*\n?[ \t]*•[ \t]*", "\n• ", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
 
 
-def _web_answer(question: str, lang: str, run_id: str) -> str | None:
-    """Live web lookup for questions the library does not cover (uses the AI provider's built-in web search
-    model when the account has one). Returns None when it is not available, so the caller falls back."""
-    global _web_off_until
-    model = os.getenv("WEB_SEARCH_MODEL", "groq/compound-mini").strip()
-    if llm.is_mock() or not model or model.lower() == "off" or time.time() < _web_off_until:
-        return None
-    if "groq" not in config.LLM_BASE_URL and not os.getenv("WEB_SEARCH_MODEL"):
+def _web_answer(question: str, lang: str, run_id: str) -> tuple[str, list] | None:
+    """Live web lookup for questions the library does not cover. The answer is written ONLY from the pages
+    found, with each fact tied to a page. Returns (answer, sources) or None when the web is not reachable."""
+    if llm.is_mock() or os.getenv("WEB_LOOKUP", "on").strip().lower() == "off":
         return None
     try:
+        from .. import web_lookup
         store.log(run_id, "Watcher", "Not in the library yet: searching official sources on the live web")
-        client = llm._get_client().with_options(timeout=45, max_retries=0)
-        r = client.chat.completions.create(
-            model=model, temperature=0.1,
-            messages=[
-                {"role": "system", "content":
-                    "You answer questions about Dubai / UAE real estate rules. Search the web and rely on official "
-                    "sources first (dubailand.gov.ae, dlp.dubai.gov.ae, vara.ae, u.ae, centralbank.ae, "
-                    "visitdubai.com / det.gov.ae, mof.gov.ae). Give the direct answer first, then the key figures, "
-                    "deadlines and law names, each extra point on its own line starting with '• '. Plain text only, "
-                    "no markdown, 3 to 8 lines. Finish with a line 'Sources:' followed by the page addresses you used. "
-                    "If the question is not about UAE real estate or its regulation, say RuleWatch only covers that."},
-                {"role": "user", "content": f"{question}\n\nAnswer in {lang}."}])
-        text = (r.choices[0].message.content or "").strip()
-        text = re.sub(r"\*\*|__|^#+\s*", "", text, flags=re.M)
-        if len(text) < 40:
+        pages = web_lookup.lookup(question)
+        if not pages:
+            store.log(run_id, "Watcher", "Live web search returned nothing usable")
             return None
-        store.log(run_id, "Watcher", "Found an answer on the live web")
-        return text[:2200]
+        n_official = sum(1 for p in pages if p["official"])
+        store.log(run_id, "Reader", f"Reading {len(pages)} web page(s), {n_official} from official sources: "
+                  + "; ".join((urlparse(p['url']).hostname or '') for p in pages))
+        block = "\n\n".join(f"[{p['eid']}] {'OFFICIAL SOURCE' if p['official'] else 'other source'} | {p['title']} | "
+                            f"{p['url']}\n{p['text']}" for p in pages)
+        out = llm.chat_json(
+            """You answer questions about Dubai / UAE real estate rules using ONLY the web passages given.
+- Direct answer first, then the key figures, deadlines and law names the passages state, each extra point on its
+  own line starting with "• ". Plain text, 3 to 8 lines.
+- Cite the passage after each fact, like [W1]. Prefer passages marked OFFICIAL SOURCE.
+- Use only what the passages say. Never add a number, law name or deadline that is not in them.
+Set "found" to true only if the passages really answer the question.""",
+            f"""Question: {question}
+
+Web passages:
+{block}
+
+Return JSON: {{"answer": "answer in {lang} with [W#] citations", "evidence": ["W1"], "found": true}}""",
+            mock=lambda: {"answer": "", "evidence": [], "found": False})
+        by_id = {p["eid"]: p for p in pages}
+        answer = _tidy(out.get("answer", ""))
+        cited = [c for c in out.get("evidence", []) if c in by_id]
+        for c in re.findall(r"\[(W\d+)\]", answer):
+            if c in by_id and c not in cited:
+                cited.append(c)
+        if not out.get("found") or not cited or len(answer) < 40:
+            store.log(run_id, "Verifier", "The web pages found do not answer the question")
+            return None
+        store.log(run_id, "Verifier", f"Web answer cites {len(cited)} real page(s)")
+        sources = [{"eid": c, "title": by_id[c]["title"], "page": 1, "url": by_id[c]["url"],
+                    "regulator": ("Official web source" if by_id[c]["official"] else "Web source") + ": "
+                                 + (urlparse(by_id[c]["url"]).hostname or ""),
+                    "kind": "html", "quote": by_id[c]["text"][:350]} for c in cited]
+        return answer, sources
     except Exception as e:
-        _web_off_until = time.time() + 1800     # not available on this account right now: skip for 30 minutes
         store.log(run_id, "Watcher", f"Live web search not available ({str(e)[:70]})")
         return None
 
 
 def _general_answer(question: str, lang: str, run_id: str, partial: str = "") -> str | None:
-    """Fallback when the verified library does not cover the question: a clearly-labelled general answer."""
+    """Last resort when neither the library nor the live web covers the question: careful general guidance,
+    clearly labelled, that points the user to the right regulator instead of guessing figures."""
     try:
         out = llm.chat_json(
             """You are an expert on Dubai and UAE real estate regulation (DLD, RERA, VARA, Dubai tenancy and
-property law, UAE federal rules). The verified rule library did not cover this question, so answer from your own
-professional knowledge. Be specific and useful: give the direct answer first, then the key figures, deadlines,
-law names and practical steps, each extra point on its own line starting with "• ". Plain text, 3 to 8 lines.
-If you are not sure of an exact figure, say it is approximate and tell the user which regulator to confirm it with.
-If the question is not about UAE real estate, property, tenancy or its regulation, reply that RuleWatch only
+property law, UAE federal rules). The verified rule library did not cover this question, so give careful general
+guidance from your professional knowledge.
+- Direct answer first (the general position), then 2 to 5 practical points, each on its own line starting with "• ".
+- Accuracy matters more than detail. State a specific number, fee, deadline, penalty or law/article number ONLY if
+  you are certain of it; otherwise describe the rule in words and say the exact figure must be confirmed.
+- Always finish with one line naming which regulator or official service to confirm with (for example DLD, RERA,
+  the Rental Disputes Center, VARA, DET, the UAE Central Bank, the Federal Tax Authority).
+- Plain text, no markdown.
+If the question is not about UAE real estate, property, tenancy or its regulation, reply only that RuleWatch
 covers Dubai / UAE real estate rules and suggest a related question it can answer.""",
             f"""Question: {question}
 {('What the verified library already said: ' + partial) if partial else ''}
 
 Return JSON: {{"answer": "the answer in {lang}"}}""",
-            mock=lambda: {"answer": ""}, temperature=0.2)
-        text = str(out.get("answer", "")).strip()
+            mock=lambda: {"answer": ""}, temperature=0.1)
+        text = _tidy(out.get("answer", ""))
         return text or None
     except Exception as e:
         store.log(run_id, "Manager", f"General answer unavailable ({str(e)[:80]})")
@@ -161,12 +188,14 @@ Passages:
 Return JSON: {{"answer": "answer in {lang} with [E#] citations", "evidence": ["E1"], "covered": "full | partial | none"}}""",
         mock=mock)
     by_id = {e["eid"]: e for e in evidence}
-    answer = str(out.get("answer", "")).strip()
+    answer = _tidy(out.get("answer", ""))
     cited = [c for c in out.get("evidence", []) if c in by_id]
     for c in re.findall(r"\[(E\d+)\]", answer):          # also count ids used inside the text
         if c in by_id and c not in cited:
             cited.append(c)
     covered = str(out.get("covered", "full")).strip().lower()
+    if covered not in ("full", "partial", "none"):
+        covered = "full"
     if not cited or not answer:
         covered = "none"
     store.log(run_id, "Verifier", f"Answer cites {len(cited)} real passage(s); library coverage: {covered}")
@@ -177,34 +206,30 @@ Return JSON: {{"answer": "answer in {lang} with [E#] citations", "evidence": ["E
     if covered == "full":
         return {"answer": answer, "sources": sources, "coverage": "verified"}
 
-    # The verified library does not fully cover it: add a clearly-labelled general answer, never a made-up citation.
-    extra = _web_answer(question, lang, run_id)
+    # The verified library does not fully cover it. Try the live web (cited by page), then careful general
+    # guidance. Either way the extra part is labelled, and no citation is ever invented.
+    web = _web_answer(question, lang, run_id)
+    extra, web_sources = (web if web else (None, []))
     from_web = bool(extra)
     if not extra:
-        store.log(run_id, "Manager", "Library does not fully cover this; adding general guidance (labelled as unverified)")
+        store.log(run_id, "Manager", "Adding general guidance, labelled as unverified")
         extra = _general_answer(question, lang, run_id, partial=answer if covered == "partial" else "")
-    if ar and from_web:
-        label = "من بحث مباشر على الإنترنت (ليس من مكتبة القواعد الموثقة بعد، المصادر مذكورة في الأسفل):"
+    if ar:
         head = "من مكتبة القواعد الموثقة:"
         none_msg = "لم أجد إجابة في مكتبة القواعد الموثقة."
-    elif from_web:
-        label = "From a live web search (not yet in RuleWatch's verified rule library; sources listed below):"
-        head = "From the verified rule library:"
-        none_msg = "The verified rule library does not cover this question yet."
-    elif ar:
-        label = "إرشاد عام (غير مأخوذ من مكتبة القواعد الموثقة، يرجى التأكد من الجهة التنظيمية):"
-        head = "من مكتبة القواعد الموثقة:"
-        none_msg = "لم أجد إجابة في مكتبة القواعد الموثقة."
+        label = ("من بحث مباشر على الإنترنت (ليس من مكتبة القواعد الموثقة بعد، المصادر في الأسفل):" if from_web else
+                 "إرشاد عام (غير مأخوذ من مكتبة القواعد الموثقة، يرجى التأكد من الجهة التنظيمية):")
     else:
-        label = "General guidance (not from RuleWatch's verified rule library, confirm with the regulator):"
         head = "From the verified rule library:"
         none_msg = "The verified rule library does not cover this question yet."
+        label = ("From a live web search (not yet in RuleWatch's verified rule library; pages listed below):" if from_web
+                 else "General guidance (not from RuleWatch's verified rule library, confirm with the regulator):")
     if covered == "partial" and extra:
-        text = f"{head}\n{answer}\n\n{label}\n{extra}"
+        text, sources = f"{head}\n{answer}\n\n{label}\n{extra}", sources + web_sources
     elif covered == "partial":
         text = answer
     elif extra:
-        text, sources = f"{label}\n{extra}", []
+        text, sources = f"{label}\n{extra}", web_sources
     else:
         text, sources = none_msg, []
     return {"answer": text, "sources": sources,
