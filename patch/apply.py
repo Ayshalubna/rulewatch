@@ -5,7 +5,8 @@
 - rulewatch/knowledge.py          essentials briefs (plain-English reference notes, loaded at start-up)
 - rulewatch/agents/ask_agent.py   the improved answer agent for the Ask tab
 - rulewatch/web_lookup.py         live web lookup (official UAE sources first) for questions the library lacks
-- frontend/dist/enhance.js/.css   the 3D interface layer and the rule calculators
+- frontend/dist/enhance.js/.css   the daylight interface layer (3D showcase, buttons) and the rule calculators
+- recolour step                   turns the packed dark theme into the light "Gulf morning" palette
 The script stops the build if anything it expects to change is missing, so a bad patch can never go live.
 """
 import shutil
@@ -75,7 +76,43 @@ if "enhance.js" not in html:
     if "</head>" not in html:
         raise SystemExit("PATCH FAILED: index.html has no </head>")
     index.write_text(html.replace(
-        "</head>", '  <link rel="stylesheet" href="/enhance.css?v=4">\n    <script defer src="/enhance.js?v=4"></script>\n  </head>', 1),
+        "</head>", '  <link rel="stylesheet" href="/enhance.css?v=5">\n    <script defer src="/enhance.js?v=5"></script>\n  </head>', 1),
         encoding="utf-8")
+
+# 5) recolour the packed stylesheet and script: dark teal + brass -> light "Gulf morning" (haze, white, ink, ultramarine)
+PALETTE = {
+    "0e191e": "e9eef5", "142329": "ffffff", "12222a": "ffffff", "22363e": "d0d9e5", "33505a": "b0bed0",
+    "c8a15a": "14213d", "e3c88e": "2f56e0", "1a1408": "ffffff", "efe8dc": "0a101c", "e4ded2": "0e1726",
+    "cdbfa7": "334155", "6d8286": "647287", "9aabab": "475569",
+    "f07560": "c8322a", "ebb650": "b0740c", "5dc796": "16875a", "b9a0f0": "6d4fd1", "7fc6d0": "1f8fa3",
+}
+EXTRA = {"rgba(0,0,0,.65)": "rgba(27,42,74,.2)", "#0000008c": "#1b2a4a33", "#0009": "#1b2a4a2e",
+         'content="#0D3B33"': 'content="#E9EEF5"'}
+
+
+def recolour(text: str) -> str:
+    import re
+
+    def trip(h):
+        return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
+    for old, new in PALETTE.items():
+        text = re.sub("#" + old, "#" + new, text, flags=re.I)
+        o, n = trip(old), trip(new)
+        text = text.replace("rgb(%d %d %d" % o, "rgb(%d %d %d" % n)
+        text = text.replace("rgba(%d,%d,%d," % o, "rgba(%d,%d,%d," % n)
+    for old, new in EXTRA.items():
+        text = text.replace(old, new)
+    return text
+
+
+dist = app / "frontend" / "dist"
+marker = dist / ".recoloured"
+if not marker.exists():
+    css_files = list((dist / "assets").glob("*.css"))
+    if not any("rgb(14 25 30" in f.read_text(encoding="utf-8") for f in css_files):
+        raise SystemExit("PATCH FAILED: the packed stylesheet does not have the colours the recolour step expects")
+    for f in css_files + list((dist / "assets").glob("*.js")) + [index]:
+        f.write_text(recolour(f.read_text(encoding="utf-8")), encoding="utf-8")
+    marker.write_text("gulf-morning", encoding="utf-8")
 
 print("RuleWatch patches applied.")
