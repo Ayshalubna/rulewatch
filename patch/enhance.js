@@ -41,7 +41,44 @@
     var el = show;
     requestAnimationFrame(function () { requestAnimationFrame(function () { el.classList.add('rw-ready'); }); });
   }
+
+  /* builder credit: under the hero buttons and in the footer of every page */
+  var BY = {
+    en: { lead: 'Designed and built by', role: 'AI Engineer, Dubai', foot: 'Built by Ayesha Lubna', port: 'Portfolio', code: 'Source code' },
+    ar: { lead: 'تصميم وتطوير', role: 'مهندسة ذكاء اصطناعي، دبي', foot: 'من تطوير عائشة لبنى', port: 'الأعمال', code: 'الشيفرة المصدرية' }
+  };
+  var PORT = 'https://ayeshalubna-builds.netlify.app/', GH = 'https://github.com/Ayshalubna/rulewatch';
+  function credits() {
+    var t = BY[lang()];
+    var hero = document.querySelector('section.grain');
+    if (hero) {
+      var old = hero.querySelector('.rw-by');
+      if (!old || old.dataset.lang !== lang()) {
+        if (old) old.remove();
+        var cta = hero.querySelector('.btn-primary');
+        var row = cta ? cta.parentElement : null;
+        if (row) {
+          var d = document.createElement('a');
+          d.className = 'rw-by'; d.dataset.lang = lang(); d.href = PORT; d.target = '_blank'; d.rel = 'noopener';
+          d.innerHTML = '<span class="rw-by-mono">AL</span><span><small>' + t.lead + '</small><b>Ayesha Lubna</b><em>' + t.role + '</em></span>';
+          row.parentElement.insertBefore(d, row.nextSibling);
+        }
+      }
+    }
+    var f = document.querySelector('footer');
+    if (f) {
+      var o2 = f.querySelector('.rw-foot');
+      if (!o2 || o2.dataset.lang !== lang()) {
+        if (o2) o2.remove();
+        var p = document.createElement('p');
+        p.className = 'rw-foot'; p.dataset.lang = lang();
+        p.innerHTML = '<b>' + t.foot + '</b><a href="' + PORT + '" target="_blank" rel="noopener">' + t.port + '</a><a href="' + GH + '" target="_blank" rel="noopener">' + t.code + '</a>';
+        f.appendChild(p);
+      }
+    }
+  }
   function scan() {
+    credits();
     var s = document.querySelector('section.grain');
     if (s) build(s); else { stage = null; show = null; }
   }
