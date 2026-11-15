@@ -1,0 +1,15 @@
+name: Keep RuleWatch awake
+
+# Render's free plan sleeps after 15 minutes without visitors, and the first visitor then waits about a minute.
+# This pings the live app every 10 minutes so judges and users always find it awake.
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping the live app
+        run: curl -s -o /dev/null -w "%{http_code}\n" --max-time 120 https://rulewatch.onrender.com/api/meta || true
