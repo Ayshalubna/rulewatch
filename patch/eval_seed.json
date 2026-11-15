@@ -1,0 +1,425 @@
+{
+"ts": "2026-11-14 23:05:00",
+"results": [
+{
+"summary": {
+"scenarios": 26,
+"signal_accuracy": 1.0,
+"citation_rate": 0.79,
+"topic_hit_rate": 0.92,
+"gaps": [
+"data & consumer protection",
+"valuation"
+],
+"errors": 0
+}
+},
+{
+"id": "AG1",
+"title": "Instagram ad without a permit",
+"company_type": "Real estate agency / broker",
+"topic": "advertising & marketing",
+"expected": [
+"red"
+],
+"got": "red",
+"match": true,
+"citation_rate": 0.75,
+"topic_hit": true,
+"covered": true,
+"seconds": 11.0
+},
+{
+"id": "AG2",
+"title": "Ad promising guaranteed returns",
+"company_type": "Real estate agency / broker",
+"topic": "advertising & marketing",
+"expected": [
+"red",
+"yellow"
+],
+"got": "red",
+"match": true,
+"citation_rate": 1.0,
+"topic_hit": true,
+"covered": true,
+"seconds": 11.0
+},
+{
+"id": "AG3",
+"title": "New agent working before getting a broker card",
+"company_type": "Real estate agency / broker",
+"topic": "brokerage licensing",
+"expected": [
+"red",
+"yellow"
+],
+"got": "red",
+"match": true,
+"citation_rate": 0.5,
+"topic_hit": true,
+"covered": true,
+"seconds": 9.0
+},
+{
+"id": "AG4",
+"title": "Marketing an unregistered off-plan project",
+"company_type": "Real estate agency / broker",
+"topic": "off-plan & escrow",
+"expected": [
+"red"
+],
+"got": "red",
+"match": true,
+"citation_rate": 1.0,
+"topic_hit": true,
+"covered": true,
+"seconds": 9.0
+},
+{
+"id": "AG5",
+"title": "Big cash buyer, no ID checks",
+"company_type": "Real estate agency / broker",
+"topic": "AML / KYC",
+"expected": [
+"red"
+],
+"got": "red",
+"match": true,
+"citation_rate": 1.0,
+"topic_hit": true,
+"covered": true,
+"seconds": 20.0
+},
+{
+"id": "AG6",
+"title": "Using the standard lease brokerage forms",
+"company_type": "Real estate agency / broker",
+"topic": "leasing & tenancy",
+"expected": [
+"green",
+"yellow"
+],
+"got": "green",
+"match": true,
+"citation_rate": 1.0,
+"topic_hit": true,
+"covered": true,
+"seconds": 20.0
+},
+{
+"id": "DV1",
+"title": "Buyer payments into company account",
+"company_type": "Developer",
+"topic": "off-plan & escrow",
+"expected": [
+"red"
+],
+"got": "red",
+"match": true,
+"citation_rate": 1.0,
+"topic_hit": true,
+"covered": true,
+"seconds": 17.0
+},
+{
+"id": "DV2",
+"title": "Launch event before registration",
+"company_type": "Developer",
+"topic": "advertising & marketing",
+"expected": [
+"red",
+"yellow"
+],
+"got": "red",
+"match": true,
+"citation_rate": 1.0,
+"topic_hit": true,
+"covered": true,
+"seconds": 24.0
+},
+{
+"id": "DV3",
+"title": "Setting service charges ourselves",
+"company_type": "Developer",
+"topic": "jointly owned property & service charges",
+"expected": [
+"red",
+"yellow"
+],
+"got": "red",
+"match": true,
+"citation_rate": 1.0,
+"topic_hit": true,
+"covered": true,
+"seconds": 23.0
+},
+{
+"id": "PM1",
+"title": "20% rent increase on renewal",
+"company_type": "Property manager",
+"topic": "rent increase",
+"expected": [
+"red"
+],
+"got": "red",
+"match": true,
+"citation_rate": 0.67,
+"topic_hit": true,
+"covered": true,
+"seconds": 13.0
+},
+{
+"id": "LL1",
+"title": "Eviction by WhatsApp with 30 days notice",
+"company_type": "Individual landlord",
+"topic": "leasing & tenancy",
+"expected": [
+"red"
+],
+"got": "red",
+"match": true,
+"citation_rate": 1.0,
+"topic_hit": true,
+"covered": true,
+"seconds": 24.0
+},
+{
+"id": "LL2",
+"title": "Lease not registered",
+"company_type": "Individual landlord",
+"topic": "leasing & tenancy",
+"expected": [
+"red",
+"yellow"
+],
+"got": "red",
+"match": true,
+"citation_rate": 0.5,
+"topic_hit": true,
+"covered": true,
+"seconds": 20.0
+},
+{
+"id": "LL3",
+"title": "Rent increase following the index with notice",
+"company_type": "Individual landlord",
+"topic": "rent increase",
+"expected": [
+"green",
+"yellow"
+],
+"got": "yellow",
+"match": true,
+"citation_rate": 0.0,
+"topic_hit": true,
+"covered": false,
+"seconds": 18.0
+},
+{
+"id": "HH1",
+"title": "Airbnb listing without a holiday home permit",
+"company_type": "Holiday homes / short-term rental operator",
+"topic": "holiday homes",
+"expected": [
+"red"
+],
+"got": "red",
+"match": true,
+"citation_rate": 1.0,
+"topic_hit": true,
+"covered": true,
+"seconds": 18.0
+},
+{
+"id": "OA1",
+"title": "Blocking access for unpaid service fees",
+"company_type": "Owners association / community manager",
+"topic": "jointly owned property & service charges",
+"expected": [
+"red",
+"yellow"
+],
+"got": "red",
+"match": true,
+"citation_rate": 1.0,
+"topic_hit": true,
+"covered": true,
+"seconds": 18.0
+},
+{
+"id": "OA2",
+"title": "Collecting fees without an approved budget",
+"company_type": "Owners association / community manager",
+"topic": "jointly owned property & service charges",
+"expected": [
+"red",
+"yellow"
+],
+"got": "red",
+"match": true,
+"citation_rate": 0.67,
+"topic_hit": true,
+"covered": true,
+"seconds": 18.0
+},
+{
+"id": "TK1",
+"title": "Selling property tokens without a licence",
+"company_type": "Tokenization / PropTech startup",
+"topic": "tokenization & virtual assets",
+"expected": [
+"red"
+],
+"got": "red",
+"match": true,
+"citation_rate": 1.0,
+"topic_hit": true,
+"covered": true,
+"seconds": 21.0
+},
+{
+"id": "TK2",
+"title": "Token buyers without ID checks",
+"company_type": "Tokenization / PropTech startup",
+"topic": "AML / KYC",
+"expected": [
+"red"
+],
+"got": "red",
+"match": true,
+"citation_rate": 1.0,
+"topic_hit": true,
+"covered": true,
+"seconds": 18.0
+},
+{
+"id": "TK3",
+"title": "Whitepaper with clear risk disclosure",
+"company_type": "Tokenization / PropTech startup",
+"topic": "tokenization & virtual assets",
+"expected": [
+"green",
+"yellow"
+],
+"got": "green",
+"match": true,
+"citation_rate": 1.0,
+"topic_hit": true,
+"covered": true,
+"seconds": 25.0
+},
+{
+"id": "TK4",
+"title": "Token marketing promising profit",
+"company_type": "Tokenization / PropTech startup",
+"topic": "tokenization & virtual assets",
+"expected": [
+"red",
+"yellow"
+],
+"got": "red",
+"match": true,
+"citation_rate": 1.0,
+"topic_hit": true,
+"covered": true,
+"seconds": 21.0
+},
+{
+"id": "MB1",
+"title": "Funds from an unknown third party",
+"company_type": "Mortgage broker / bank",
+"topic": "AML / KYC",
+"expected": [
+"red",
+"yellow"
+],
+"got": "red",
+"match": true,
+"citation_rate": 1.0,
+"topic_hit": true,
+"covered": true,
+"seconds": 15.0
+},
+{
+"id": "VF1",
+"title": "Valuation by an unregistered valuer",
+"company_type": "Valuation firm",
+"topic": "valuation",
+"expected": [
+"red",
+"yellow"
+],
+"got": "yellow",
+"match": true,
+"citation_rate": 0.0,
+"topic_hit": false,
+"covered": false,
+"seconds": 18.0
+},
+{
+"id": "FM1",
+"title": "Sharing residents' data with marketers",
+"company_type": "Facility management / maintenance company",
+"topic": "data & consumer protection",
+"expected": [
+"red",
+"yellow"
+],
+"got": "yellow",
+"match": true,
+"citation_rate": 0.0,
+"topic_hit": false,
+"covered": false,
+"seconds": 9.0
+},
+{
+"id": "TN1",
+"title": "Tenant pays only the allowed increase",
+"company_type": "Tenant or buyer (individual)",
+"topic": "rent increase",
+"expected": [
+"green",
+"yellow"
+],
+"got": "green",
+"match": true,
+"citation_rate": 1.0,
+"topic_hit": true,
+"covered": true,
+"seconds": 27.0
+},
+{
+"id": "TN2",
+"title": "Off-plan buyer paying the developer directly",
+"company_type": "Tenant or buyer (individual)",
+"topic": "off-plan & escrow",
+"expected": [
+"red",
+"yellow"
+],
+"got": "red",
+"match": true,
+"citation_rate": 0.33,
+"topic_hit": true,
+"covered": true,
+"seconds": 18.0
+},
+{
+"id": "TN3",
+"title": "Buying without checking the title deed",
+"company_type": "Tenant or buyer (individual)",
+"topic": "registration & title deeds",
+"expected": [
+"red",
+"yellow"
+],
+"got": "red",
+"match": true,
+"citation_rate": 1.0,
+"topic_hit": true,
+"covered": true,
+"seconds": 18.0
+}
+]
+}
